@@ -12,6 +12,7 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int HEIGHT = 800;
     final int FPS = 60;
     Thread gameThread;
+    Board board = new Board();
 
     // Construtor do painel.
     public GamePanel() {
@@ -21,6 +22,7 @@ public class GamePanel extends JPanel implements Runnable {
         setBackground(Color.black);
     }
 
+    // Cria uma nova Thread
     public void launchGame() {
         gameThread = new Thread(this);
         gameThread.start();
@@ -29,12 +31,17 @@ public class GamePanel extends JPanel implements Runnable {
     @Override
     public void run() {
 
-        // GAME LOOP
+        // GAME LOPP
+        // drawInterval → Tempo entre frames desejado em nanossegundos.
+        // Se FPS = 60, então drawInterval = 1 bilhão / 60 ≈ 16.666.666 ns (ou seja, ~16,67 ms por frame).
         double drawInterval = 1000000000/FPS;
+        // delta garante que o jogo atualize na frequência certa, mesmo que o loop rode mais rápido ou mais devagar.
         double delta = 0;
+        // Marca o tempo do loop anterior
         long lastTime = System.nanoTime();
         long currentTime;
 
+        // Roda infinitamente enquanto o jogo estiver ativo
         while (gameThread != null) {
 
             currentTime = System.nanoTime();
@@ -52,11 +59,17 @@ public class GamePanel extends JPanel implements Runnable {
 
     }
 
+    //Logica do jogo: Exemplo > mover personagem, detectar colisão, atualizar pontuação.m
     private void update() {
     }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
+
+        Graphics2D g2 = (Graphics2D)g;
+
+        board.draw(g2);
+
     }
 
 }
