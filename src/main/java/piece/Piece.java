@@ -3,6 +3,7 @@ package piece;
 import com.chess.game.Board;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
@@ -30,12 +31,22 @@ public class Piece {
         preCol = col;
         preRow = row;
     }
+    // Esse metodo recebe uma string com o caminho da imagem e retorna uma BufferedImage — que é a imagem da peça carregada na memória.
     public BufferedImage getImage(String imagePath) {
 
+    //Cria uma variável local chamada image que inicialmente está vazia (null).
+    //Essa variável vai receber a imagem carregada mais à frente.
         BufferedImage image = null;
 
         try {
-            image = ImageIO.read(getClass().getResourceAsStream(imagePath + ".png"));
+            // ImageIO.read(...) tenta ler um arquivo de imagem.
+            // getClass().getResourceAsStream pega o arquivo dentro do diretório de recurso como um fluxo de bytes
+            var stream = getClass().getClassLoader().getResourceAsStream(imagePath);
+            if (stream == null) {
+                System.out.println("Imagem não encontrada: " + imagePath);
+            } else {
+                image = ImageIO.read(stream);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -52,5 +63,9 @@ public class Piece {
     }
     public int getY(int row) {
         return row * Board.SQUARE_SIZE;
+    }
+
+    public void draw(Graphics2D g2) {
+        g2.drawImage(image, x, y, Board.SQUARE_SIZE, Board.SQUARE_SIZE, null);
     }
 }
