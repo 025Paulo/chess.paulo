@@ -16,10 +16,12 @@ public class GamePanel extends JPanel implements Runnable {
     final int FPS = 60;
     Thread gameThread;
     Board board = new Board();
+    Mouse mouse = new Mouse();
 
     // Peças
     public static ArrayList<Piece> pieces = new ArrayList<>();
     public static ArrayList<Piece> simPieces = new ArrayList<>();
+    Piece activeP;
 
     // Cor
     public static final int WHITE = 0;
@@ -32,6 +34,8 @@ public class GamePanel extends JPanel implements Runnable {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
         // Define o fundo preto do painel
         setBackground(Color.black);
+        addMouseMotionListener(mouse);
+        addMouseListener(mouse);
 
         setPieces();
         // pieces = source, simPieces = target
@@ -120,8 +124,46 @@ public class GamePanel extends JPanel implements Runnable {
 
     }
 
-    //Logica do jogo: Exemplo > mover personagem, detectar colisão, atualizar pontuação.m
+    //Logica do jogo: Exemplo = mover peça, detectar colisão
     private void update() {
+
+        if (mouse.pressed) {
+            if (activeP == null) {
+
+                for (Piece piece : simPieces) {
+                    // Garante que o jogador só consiga selecionar peças da sua própria cor
+                    if (piece.color == currentColor &&
+                        //Transforma a coordenada pixel x do clique do mouse em uma coluna do tabuleiro (dividindo pelo tamanho de cada quadrado)
+                        piece.col == mouse.x/Board.SQUARE_SIZE &&
+                        //Transforma a coordenada pixel y do clique do mouse em uma linha do tabuleiro.
+                        piece.row == mouse.y/Board.SQUARE_SIZE) {
+
+                        activeP = piece;
+                    }
+                }
+            }
+            else {
+                simulate();
+            }
+        }
+
+        if (!mouse.pressed) {
+            if (activeP != null) {
+                activeP.updatePosition();
+                activeP = null;
+            }
+        }
+
+    }
+
+    private void simulate() {
+
+        //se a peça esta sendo segurrada, atualiza a posiçao
+        activeP.x = mouse.x - Board.HALF_SQUARE_SIZE;
+        activeP.y = mouse.y - Board.HALF_SQUARE_SIZE;
+        activeP.col = activeP.getCol(activeP.x);
+        activeP.row = activeP.getRow(activeP.y);
+
     }
 
     public void paintComponent(Graphics g) {
@@ -133,6 +175,19 @@ public class GamePanel extends JPanel implements Runnable {
         //Peças
         for (Piece p : simPieces) {
             p.draw(g2);
+        }
+
+        //se o jogador estiver segurando um peão, o simulate vai atualizar a posição com base no mouse,
+        // e esse if vai desenhar um destaque  semitransparente na casa onde o peão está sendo arrastado
+        if (activeP != null) {
+            g2.setColor(Color.white);
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+            //Desenha um retângulo branco semitransparente na posição da peça que está sendo arrastada
+            g2.fillRect(activeP.col*Board.SQUARE_SIZE, activeP.row*Board.SQUARE_SIZE,
+                    Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+
+            activeP.draw(g2); //desenha a peça arrastada sobre esse quadrado para ela ficar visivel
         }
 
     }
