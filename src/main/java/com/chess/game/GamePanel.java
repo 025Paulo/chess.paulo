@@ -28,6 +28,9 @@ public class GamePanel extends JPanel implements Runnable {
     public static final int BLACK = 1;
     int currentColor = WHITE;
 
+    boolean canMove;
+    boolean validSquare;
+
     // Construtor do painel.
     public GamePanel() {
         // Diz ao layout manager que o painel deve ter esse tamanho.
@@ -149,20 +152,47 @@ public class GamePanel extends JPanel implements Runnable {
 
         if (!mouse.pressed) {
             if (activeP != null) {
-                activeP.updatePosition();
-                activeP = null;
+
+                if (validSquare) {
+
+                    //Atualiza a lista se uma peça tiver sido capturada e removida durante o metodo simulate
+                    copyPieces(simPieces, pieces);
+                    activeP.updatePosition();
+                } else {
+                    //O movimento nao é valido, é para resetar
+                    copyPieces(pieces, simPieces);
+                    activeP.resetPosition();
+                    activeP = null;
+                }
             }
         }
-
     }
 
     private void simulate() {
+
+        canMove = false;
+        validSquare = false;
+
+        // Reseta a lista de peças em todo loop
+        // Isso é para restaurar a peça removida durante a simulaçao
 
         //se a peça esta sendo segurrada, atualiza a posiçao
         activeP.x = mouse.x - Board.HALF_SQUARE_SIZE;
         activeP.y = mouse.y - Board.HALF_SQUARE_SIZE;
         activeP.col = activeP.getCol(activeP.x);
         activeP.row = activeP.getRow(activeP.y);
+
+        if (activeP.canMove(activeP.col, activeP.row)) {
+
+            canMove = true;
+
+            //Se acertar outra peça, remove ela da lista
+            if (activeP.hittingP != null) {
+                simPieces.remove(activeP.hittingP.getIndex());
+            }
+
+            validSquare = true;
+        }
 
     }
 
@@ -180,12 +210,14 @@ public class GamePanel extends JPanel implements Runnable {
         //se o jogador estiver segurando um peão, o simulate vai atualizar a posição com base no mouse,
         // e esse if vai desenhar um destaque  semitransparente na casa onde o peão está sendo arrastado
         if (activeP != null) {
-            g2.setColor(Color.white);
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-            //Desenha um retângulo branco semitransparente na posição da peça que está sendo arrastada
-            g2.fillRect(activeP.col*Board.SQUARE_SIZE, activeP.row*Board.SQUARE_SIZE,
-                    Board.SQUARE_SIZE, Board.SQUARE_SIZE);
-            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+            if (canMove) {
+                g2.setColor(Color.white);
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+                //Desenha um retângulo branco semitransparente na posição da peça que está sendo arrastada
+                g2.fillRect(activeP.col * Board.SQUARE_SIZE, activeP.row * Board.SQUARE_SIZE,
+                        Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+            }
 
             activeP.draw(g2); //desenha a peça arrastada sobre esse quadrado para ela ficar visivel
         }
