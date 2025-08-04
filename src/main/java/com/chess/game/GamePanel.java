@@ -175,6 +175,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         // Reseta a lista de peças em todo loop
         // Isso é para restaurar a peça removida durante a simulaçao
+        copyPieces(pieces, simPieces);
 
         //se a peça esta sendo segurrada, atualiza a posiçao
         activeP.x = mouse.x - Board.HALF_SQUARE_SIZE;

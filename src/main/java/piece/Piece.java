@@ -72,6 +72,7 @@ public class Piece {
     public int getRow(int y) {
         return (y + Board.HALF_SQUARE_SIZE)/Board.SQUARE_SIZE;
     }
+    // O loop percorre a lista de peças GamePanel.simPieces e retorna o index(posicao) da peca atual
     public int getIndex() {
         for (int index = 0; index < GamePanel.simPieces.size(); index++) {
             if (GamePanel.simPieces.get(index) == this) {
@@ -104,6 +105,14 @@ public class Piece {
         }
         return false;
     }
+    //Retorna true se estiver escolhendo a mesma posição que esta
+    public boolean isSameSquare(int targetCol, int targetRow) {
+        if (targetCol == preCol && targetRow == preRow) {
+            return true;
+        }
+        return false;
+    }
+
     public Piece getHittingP(int targetCol, int targetRow) {
         for (Piece piece : GamePanel.simPieces) {
             if (piece.col == targetCol && piece.row == targetRow && piece != this) {
@@ -127,6 +136,28 @@ public class Piece {
                 hittingP = null;
             }
         }
+
+        return false;
+    }
+    public boolean pieceIsOnStraightLine(int targetCol, int targetRow) {
+
+        // Percorre da direita para esquerda e verifica se tem uma peça no meio do caminho
+        //Checa todas as colunas entre preCol
+        for (int c = preCol-1; c > targetCol; c--) {
+            //Percorre todas as peças do jogo.
+            for (Piece piece : GamePanel.simPieces) {
+                //Verifica se existe alguma peça exatamente na coluna atual
+                if (piece.col == c && piece.row == targetRow) {
+                    hittingP = piece;
+                    return true;
+                }
+            }
+        }
+        // Quando a peça tiver movendo para direita
+
+        // Quando a peça tiver movendo para cima
+
+        // Quando a peça tiver movendo para baixo
 
         return false;
     }
