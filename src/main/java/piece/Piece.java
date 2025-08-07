@@ -154,11 +154,96 @@ public class Piece {
             }
         }
         // Quando a peça tiver movendo para direita
+        for (int c = preCol+1; c < targetCol; c++) {
+            //Percorre todas as peças do jogo.
+            for (Piece piece : GamePanel.simPieces) {
+                //Verifica se existe alguma peça exatamente na coluna atual
+                if (piece.col == c && piece.row == targetRow) {
+                    hittingP = piece;
+                    return true;
+                }
+            }
+        }
 
         // Quando a peça tiver movendo para cima
+        for (int r = preRow-1; r > targetRow; r--) {
+            //Percorre todas as peças do jogo.
+            for (Piece piece : GamePanel.simPieces) {
+                //Verifica se existe alguma peça exatamente na coluna atual
+                if (piece.col == targetCol && piece.row == r) {
+                    hittingP = piece;
+                    return true;
+                }
+            }
+        }
 
         // Quando a peça tiver movendo para baixo
+        for (int r = preRow+1; r < targetRow; r++) {
+            //Percorre todas as peças do jogo.
+            for (Piece piece : GamePanel.simPieces) {
+                //Verifica se existe alguma peça exatamente na coluna atual
+                if (piece.col == targetCol && piece.row == r) {
+                    hittingP = piece;
+                    return true;
+                }
+            }
+        }
 
+        return false;
+    }
+    public boolean pieceIsOnDiagonalLine(int targetCol, int targetRow) {
+
+        if (targetRow < preRow) {
+            // Diagonal subindo para esquerda
+            //checa a partir de uma coluna à esquerda da posição atual
+            for (int c = preCol-1 ; c > targetCol; c--) {
+                //diff representa quantas colunas a posição c está distante da posição atual
+                int diff = Math.abs(c - preCol);
+                for (Piece piece : GamePanel.simPieces) {
+                    if (piece.col == c && piece.row == preRow - diff) {
+                        hittingP = piece;
+                        return true;
+                    }
+                }
+            }
+            // Diagonal subindo para Direita
+            for (int c = preCol+1 ; c < targetCol; c++) {
+                //diff representa quantas colunas a posição c está distante da posição atual
+                int diff = Math.abs(c - preCol);
+                for (Piece piece : GamePanel.simPieces) {
+                    if (piece.col == c && piece.row == preRow - diff) {
+                        hittingP = piece;
+                        return true;
+                    }
+                }
+            }
+        }
+
+        if (targetRow > preRow) {
+            // Diagonal descendo para esquerda
+            for (int c = preCol-1; c > targetCol; c--) {
+                //diff representa quantas colunas a posição c está distante da posição atual
+                int diff = Math.abs(c - preCol);
+                for (Piece piece : GamePanel.simPieces) {
+                    if (piece.col == c && piece.row == preRow + diff) {
+                        hittingP = piece;
+                        return true;
+                    }
+                }
+            }
+            // Diagonal descendo para direita
+            for (int c = preCol+1 ; c < targetCol; c++) {
+                //diff representa quantas colunas a posição c está distante da posição atual
+                int diff = Math.abs(c - preCol);
+                for (Piece piece : GamePanel.simPieces) {
+                    if (piece.col == c && piece.row == preRow + diff) {
+                        hittingP = piece;
+                        return true;
+                    }
+                }
+            }
+
+        }
         return false;
     }
 

@@ -18,7 +18,7 @@ public class Rook extends Piece {
         if (isWithinBoard(targetCol,targetRow) && isSameSquare(targetCol, targetRow) == false) {
             //garante que o movimento seja em linha reta ou na mesma coluna
             if (targetCol == preCol || targetRow == preRow) {
-                if (isValidSquare(targetCol, targetRow)) {
+                if (isValidSquare(targetCol, targetRow) && pieceIsOnStraightLine(targetCol, targetRow) == false) {
                     return true;
                 }
             }
