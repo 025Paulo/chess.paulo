@@ -54,6 +54,7 @@ public class GamePanel extends JPanel implements Runnable {
         gameThread = new Thread(this);
         gameThread.start();
     }
+
     public void setPieces() {
 
         //Brancas
@@ -92,10 +93,11 @@ public class GamePanel extends JPanel implements Runnable {
         pieces.add(new Queen(BLACK, 3, 0));
         pieces.add(new King(BLACK, 4, 0));
     }
+
     private void copyPieces(ArrayList<Piece> source, ArrayList<Piece> target) {
         // Limpa a lista target antes de copiar os elementos da source.
         target.clear();
-        for (int i = 0; i<source.size(); i++) {
+        for (int i = 0; i < source.size(); i++) {
             target.add(source.get(i));
         }
     }
@@ -106,7 +108,7 @@ public class GamePanel extends JPanel implements Runnable {
         // GAME LOPP
         // drawInterval → Tempo entre frames desejado em nanossegundos.
         // Se FPS = 60, então drawInterval = 1 bilhão / 60 ≈ 16.666.666 ns (ou seja, ~16,67 ms por frame).
-        double drawInterval = 1000000000/FPS;
+        double drawInterval = 1000000000 / FPS;
         // delta garante que o jogo atualize na frequência certa, mesmo que o loop rode mais rápido ou mais devagar.
         double delta = 0;
         // Marca o tempo do loop anterior
@@ -118,7 +120,7 @@ public class GamePanel extends JPanel implements Runnable {
 
             currentTime = System.nanoTime();
 
-            delta += (currentTime - lastTime)/drawInterval;
+            delta += (currentTime - lastTime) / drawInterval;
             lastTime = currentTime;
 
             if (delta >= 1) {
@@ -136,8 +138,7 @@ public class GamePanel extends JPanel implements Runnable {
 
         if (promotion) {
             promoting();
-        }
-        else {
+        } else {
             if (mouse.pressed) {
                 if (activeP == null) {
 
@@ -145,15 +146,14 @@ public class GamePanel extends JPanel implements Runnable {
                         // Garante que o jogador só consiga selecionar peças da sua própria cor
                         if (piece.color == currentColor &&
                                 //Transforma a coordenada pixel x do clique do mouse em uma coluna do tabuleiro (dividindo pelo tamanho de cada quadrado)
-                                piece.col == mouse.x/Board.SQUARE_SIZE &&
+                                piece.col == mouse.x / Board.SQUARE_SIZE &&
                                 //Transforma a coordenada pixel y do clique do mouse em uma linha do tabuleiro.
-                                piece.row == mouse.y/Board.SQUARE_SIZE) {
+                                piece.row == mouse.y / Board.SQUARE_SIZE) {
 
                             activeP = piece;
                         }
                     }
-                }
-                else {
+                } else {
                     simulate();
                 }
             }
@@ -172,8 +172,7 @@ public class GamePanel extends JPanel implements Runnable {
 
                         if (canPromote()) {
                             promotion = true;
-                        }
-                        else {
+                        } else {
                             changePlayer();
                         }
                     } else {
@@ -192,16 +191,15 @@ public class GamePanel extends JPanel implements Runnable {
                 for (Piece piece : simPieces) {
                     // Garante que o jogador só consiga selecionar peças da sua própria cor
                     if (piece.color == currentColor &&
-                        //Transforma a coordenada pixel x do clique do mouse em uma coluna do tabuleiro (dividindo pelo tamanho de cada quadrado)
-                        piece.col == mouse.x/Board.SQUARE_SIZE &&
-                        //Transforma a coordenada pixel y do clique do mouse em uma linha do tabuleiro.
-                        piece.row == mouse.y/Board.SQUARE_SIZE) {
+                            //Transforma a coordenada pixel x do clique do mouse em uma coluna do tabuleiro (dividindo pelo tamanho de cada quadrado)
+                            piece.col == mouse.x / Board.SQUARE_SIZE &&
+                            //Transforma a coordenada pixel y do clique do mouse em uma linha do tabuleiro.
+                            piece.row == mouse.y / Board.SQUARE_SIZE) {
 
                         activeP = piece;
                     }
                 }
-            }
-            else {
+            } else {
                 simulate();
             }
         }
@@ -220,8 +218,7 @@ public class GamePanel extends JPanel implements Runnable {
 
                     if (canPromote()) {
                         promotion = true;
-                    }
-                    else {
+                    } else {
                         changePlayer();
                     }
                 } else {
@@ -267,10 +264,27 @@ public class GamePanel extends JPanel implements Runnable {
 
             checkCastling();
 
+            if (isIllegal(activeP) == false) {
+                validSquare = true;
+            }
+
             validSquare = true;
         }
-
     }
+
+    private boolean isIllegal(Piece king) {
+
+        if (king.type == Type.KING) {
+            for (Piece piece : simPieces) {
+                if (piece != king && piece.color != king.color && piece.canMove(king.col, king.row)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private void checkCastling() {
 
         if (castlingP != null) {
@@ -279,7 +293,7 @@ public class GamePanel extends JPanel implements Runnable {
                 castlingP.col += 3;
             }
             // move a torre da coluna 7 para 2 casas a esquerda
-            else if(castlingP.col == 7) {
+            else if (castlingP.col == 7) {
                 castlingP.col -= 2;
             }
             //garante que a torre vai aparecer na tela no novo lugar
@@ -297,8 +311,7 @@ public class GamePanel extends JPanel implements Runnable {
                     piece.twoStepped = false;
                 }
             }
-        }
-        else {
+        } else {
             currentColor = WHITE;
             // Reseta o two step status das branca
             for (Piece piece : pieces) {
@@ -329,13 +342,22 @@ public class GamePanel extends JPanel implements Runnable {
 
         if (mouse.pressed) {
             for (Piece piece : promoPieces) {
-                if (piece.col == mouse.x/Board.SQUARE_SIZE && piece.row == mouse.y/Board.SQUARE_SIZE) {
+                if (piece.col == mouse.x / Board.SQUARE_SIZE && piece.row == mouse.y / Board.SQUARE_SIZE) {
                     switch (piece.type) {
-                        case ROOK: simPieces.add(new Rook(currentColor, activeP.col, activeP.row)); break;
-                        case KNIGHT: simPieces.add(new Knight(currentColor, activeP.col, activeP.row)); break;
-                        case BISHOP: simPieces.add(new Bishop(currentColor, activeP.col, activeP.row)); break;
-                        case QUEEN: simPieces.add(new Queen(currentColor, activeP.col, activeP.row)); break;
-                        default: break;
+                        case ROOK:
+                            simPieces.add(new Rook(currentColor, activeP.col, activeP.row));
+                            break;
+                        case KNIGHT:
+                            simPieces.add(new Knight(currentColor, activeP.col, activeP.row));
+                            break;
+                        case BISHOP:
+                            simPieces.add(new Bishop(currentColor, activeP.col, activeP.row));
+                            break;
+                        case QUEEN:
+                            simPieces.add(new Queen(currentColor, activeP.col, activeP.row));
+                            break;
+                        default:
+                            break;
                     }
                     simPieces.remove(activeP.getIndex());
                     copyPieces(simPieces, pieces);
@@ -347,10 +369,11 @@ public class GamePanel extends JPanel implements Runnable {
         }
 
     }
+
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        Graphics2D g2 = (Graphics2D)g;
+        Graphics2D g2 = (Graphics2D) g;
         //Board
         board.draw(g2);
         //Peças
@@ -362,33 +385,42 @@ public class GamePanel extends JPanel implements Runnable {
         // e esse if vai desenhar um destaque  semitransparente na casa onde o peão está sendo arrastado
         if (activeP != null) {
             if (canMove) {
-                g2.setColor(Color.white);
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
-                //Desenha um retângulo branco semitransparente na posição da peça que está sendo arrastada
-                g2.fillRect(activeP.col * Board.SQUARE_SIZE, activeP.row * Board.SQUARE_SIZE,
-                        Board.SQUARE_SIZE, Board.SQUARE_SIZE);
-                g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+                if (isIllegal(activeP)) {
+                    g2.setColor(Color.gray);
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+                    //Desenha um retângulo branco semitransparente na posição da peça que está sendo arrastada
+                    g2.fillRect(activeP.col * Board.SQUARE_SIZE, activeP.row * Board.SQUARE_SIZE,
+                            Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+                } else {
+                    g2.setColor(Color.white);
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+                    //Desenha um retângulo branco semitransparente na posição da peça que está sendo arrastada
+                    g2.fillRect(activeP.col * Board.SQUARE_SIZE, activeP.row * Board.SQUARE_SIZE,
+                            Board.SQUARE_SIZE, Board.SQUARE_SIZE);
+                    g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+                }
+
+                activeP.draw(g2); //desenha a peça arrastada sobre esse quadrado para ela ficar visivel
             }
+            // mensagem de status
+            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            g2.setFont(new Font("Book Antiqua", Font.PLAIN, 40));
+            g2.setColor(Color.white);
 
-            activeP.draw(g2); //desenha a peça arrastada sobre esse quadrado para ela ficar visivel
-        }
-        // mensagem de status
-        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON) ;
-        g2.setFont(new Font("Book Antiqua", Font.PLAIN, 40));
-        g2.setColor(Color.white);
-
-        if (promotion) {
-            g2.drawString("Promote to:", 840, 150);
-            for (Piece piece : promoPieces) {
-                g2.drawImage(piece.image, piece.getX(piece.col), piece.getY(piece.row),
-                        Board.SQUARE_SIZE, Board.SQUARE_SIZE, null);
-            }
-        } else {
-
-            if (currentColor == WHITE) {
-                g2.drawString("White's Turn", 840, 550);
+            if (promotion) {
+                g2.drawString("Promote to:", 840, 150);
+                for (Piece piece : promoPieces) {
+                    g2.drawImage(piece.image, piece.getX(piece.col), piece.getY(piece.row),
+                            Board.SQUARE_SIZE, Board.SQUARE_SIZE, null);
+                }
             } else {
-                g2.drawString("Black's Turn", 840, 250);
+
+                if (currentColor == WHITE) {
+                    g2.drawString("White's Turn", 840, 550);
+                } else {
+                    g2.drawString("Black's Turn", 840, 250);
+                }
             }
         }
     }
