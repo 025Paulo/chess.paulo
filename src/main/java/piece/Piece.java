@@ -2,6 +2,7 @@ package piece;
 
 import com.chess.game.Board;
 import com.chess.game.GamePanel;
+import com.chess.game.Type;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -10,6 +11,7 @@ import java.io.IOException;
 
 public class Piece {
 
+    public Type type;
     // A imagem da peça (o ícone que será desenhado na tela).
     public BufferedImage image;
     // A posição em pixels da peça na tela (para desenho).
@@ -20,7 +22,7 @@ public class Piece {
     //
     public int color;
     public Piece hittingP;
-    public boolean moved;
+    public boolean moved, twoStepped;
 
     public Piece(int color, int col, int row) {
 
@@ -84,6 +86,12 @@ public class Piece {
     }
 
     public void updatePosition() {
+
+        if (type == Type.PAWN) {
+            if (Math.abs(row - preRow) == 2) {
+                twoStepped = true;
+            }
+        }
 
         x = getX(col);
         y = getY(row);
