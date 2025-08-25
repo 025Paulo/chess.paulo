@@ -171,6 +171,17 @@ public class GamePanel extends JPanel implements Runnable {
                             castlingP.updatePosition();
                         }
 
+                        if (isKingInCheck()) {
+                            // possivel fim do jogo
+
+                        }
+//                    else {
+//                        if (canPromote()) {
+//                            promotion = true;
+//                        } else {
+//                            changePlayer();
+//                        }
+//                    }
                         if (canPromote()) {
                             promotion = true;
                         } else {
@@ -217,18 +228,6 @@ public class GamePanel extends JPanel implements Runnable {
                         castlingP.updatePosition();
                     }
 
-                    if (isKingInCheck()) {
-
-
-                    }
-                    else {
-                        if (canPromote()) {
-                            promotion = true;
-                        } else {
-                            changePlayer();
-                        }
-                    }
-
                 } else {
                     //O movimento nao é valido, é para resetar
                     copyPieces(pieces, simPieces);
@@ -272,7 +271,7 @@ public class GamePanel extends JPanel implements Runnable {
 
             checkCastling();
 
-            if (isIllegal(activeP) == false) {
+            if (isIllegal(activeP) == false && opponentCanCaptureKing() == false) {
                 validSquare = true;
             }
 
@@ -292,6 +291,20 @@ public class GamePanel extends JPanel implements Runnable {
 
         return false;
     }
+
+    private boolean opponentCanCaptureKing() {
+
+        Piece king = getKing(false);
+
+        for (Piece piece : simPieces) {
+            if (piece.color != king.color && piece.canMove(king.col, king.row)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private boolean isKingInCheck() {
 
         Piece king = getKing(true);
@@ -299,8 +312,7 @@ public class GamePanel extends JPanel implements Runnable {
         if (activeP.canMove(king.col, king.row)) {
             checkingP = activeP;
             return true;
-        }
-        else {
+        } else {
             checkingP = null;
         }
 
@@ -316,8 +328,7 @@ public class GamePanel extends JPanel implements Runnable {
                 if (piece.type == Type.KING && piece.color != currentColor) {
                     king = piece;
                 }
-            }
-            else {
+            } else {
                 if (piece.type == Type.KING && piece.color == currentColor) {
                     king = piece;
                 }
@@ -326,6 +337,64 @@ public class GamePanel extends JPanel implements Runnable {
         return king;
     }
 
+    private boolean isCheckmate() {
+
+        return false;
+    }
+
+    private boolean kingCanMove(Piece king) {
+        // Simula se tem algum lugar que o rei pode se mover
+        if (isValidMove(king, -1, -1)) {
+            return true;
+        }
+        if (isValidMove(king, 0, -1)) {
+            return true;
+        }
+        if (isValidMove(king, 1, -1)) {
+            return true;
+        }
+        if (isValidMove(king, -1, 0)) {
+            return true;
+        }
+        if (isValidMove(king, 1, 0)) {
+            return true;
+        }
+        if (isValidMove(king, -1, 1)) {
+            return true;
+        }
+        if (isValidMove(king, 0, 1)) {
+            return true;
+        }
+        if (isValidMove(king, 1, 1)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isValidMove(Piece king, int colPlus, int rowPlus) {
+
+        boolean isValidMove = false;
+
+        //atualiza a posicao do rei
+        king.col += colPlus;
+        king.row += rowPlus;
+
+        if (king.canMove(king.col, king.row)) {
+
+            if (king.hittingP != null) {
+                simPieces.remove(king.hittingP.getIndex());
+            }
+            if (!isIllegal(king)) {
+                isValidMove = true;
+            }
+        }
+        //reseta a posiçao do rei
+        king.resetPosition();
+        copyPieces(pieces, simPieces);
+
+        return isValidMove;
+    }
     private void checkCastling() {
 
         if (castlingP != null) {
@@ -426,7 +495,7 @@ public class GamePanel extends JPanel implements Runnable {
         // e esse if vai desenhar um destaque  semitransparente na casa onde o peão está sendo arrastado
         if (activeP != null) {
             if (canMove) {
-                if (isIllegal(activeP)) {
+                if (isIllegal(activeP) || opponentCanCaptureKing()) {
                     g2.setColor(Color.red);
                     g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
                     //Desenha um retângulo branco semitransparente na posição da peça que está sendo arrastada
@@ -441,6 +510,7 @@ public class GamePanel extends JPanel implements Runnable {
                             Board.SQUARE_SIZE, Board.SQUARE_SIZE);
                     g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
                 }
+            }
 
                 activeP.draw(g2); //desenha a peça arrastada sobre esse quadrado para ela ficar visivel
             }
@@ -459,10 +529,20 @@ public class GamePanel extends JPanel implements Runnable {
 
                 if (currentColor == WHITE) {
                     g2.drawString("White's Turn", 840, 550);
+                    if (checkingP != null && checkingP.color == BLACK) {
+                        g2.setColor(Color.red);
+                        g2.drawString("The King", 840, 650);
+                        g2.drawString("Is in check", 840, 700);
+                    }
                 } else {
                     g2.drawString("Black's Turn", 840, 250);
+                    if (checkingP != null && checkingP.color == WHITE) {
+                        g2.setColor(Color.red);
+                        g2.drawString("The King", 840, 100);
+                        g2.drawString("Is in check", 840, 150);
+                    }
                 }
             }
         }
     }
-}
+
